@@ -1,0 +1,19 @@
+# configs/lora_config.yaml
+
+# BitsAndBytes 4-bit Quantization Config (for QLoRA)
+quantization:
+  load_in_4bit: true
+  bnb_4bit_quant_type: "nf4"          # Normalized Float 4 (optimal for zero-shot/fine-tuning)
+  bnb_4bit_use_double_quant: true     # Nested quantization for saving ~0.4 bits/param
+  bnb_4bit_compute_dtype: "bfloat16"  # Compute in bf16 (supported by RTX 4060)
+
+# PEFT LoRA Parameters
+lora:
+  r: 8
+  lora_alpha: 16
+  target_modules:
+    - "query_key_value"               # target_modules for GPT-NeoX / Pythia architecture
+  lora_dropout: 0.05
+  bias: "none"
+  task_type: "CAUSAL_LM"
+  modules_to_save: null               # Optional modules to keep trainable (e.g. embed_tokens, lm_head)

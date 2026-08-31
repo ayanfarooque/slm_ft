@@ -1,0 +1,112 @@
+# configs/dataset_config.yaml
+
+# Global dataset pre-processing and tokenization parameters
+preprocessing:
+  max_seq_length: 512
+  packing: true  # Pack multiple examples into one sequence to maximize throughput
+  truncation: true
+  padding: "max_length"
+  add_special_tokens: true
+  text_column_mapping:
+    # Maps dataset fields to a unified 'text' format for pre-training/fine-tuning
+    default: "text"
+    ag_news: "text"
+    yelp_review_full: "text"
+    cnn_dailymail: "article"
+    xsum: "document"
+    daily_dialog: "dialog"
+    eli5: "text"
+    squad: "context"
+
+# Datasets definition (10 non-reasoning, text-only datasets)
+datasets:
+  - name: "TinyStories"
+    path: "roneneldan/TinyStories"
+    config: null
+    train_split: "train"
+    validation_split: "validation"
+    text_column: "text"
+    format: "raw"
+
+  - name: "wikitext-103"
+    path: "wikitext"
+    config: "wikitext-103-v1"
+    train_split: "train"
+    validation_split: "validation"
+    text_column: "text"
+    format: "raw"
+
+  - name: "openwebtext"
+    path: "openwebtext"
+    config: null
+    train_split: "train"
+    validation_split: null
+    val_split_percentage: 5
+    text_column: "text"
+    format: "raw"
+    max_samples: 50000
+
+  - name: "ag_news"
+    path: "ag_news"
+    config: null
+    train_split: "train"
+    validation_split: "test"
+    text_column: "text"
+    format: "template"
+    template: "Title: {title}\nText: {text}\nCategory: {label}"
+
+  - name: "yelp_review_full"
+    path: "yelp_review_full"
+    config: null
+    train_split: "train"
+    validation_split: "test"
+    text_column: "text"
+    format: "template"
+    template: "Review: {text}\nRating: {label}"
+    max_samples: 20000
+
+  - name: "cnn_dailymail"
+    path: "cnn_dailymail"
+    config: "3.0.0"
+    train_split: "train"
+    validation_split: "validation"
+    text_column: "article"
+    format: "template"
+    template: "Article: {article}\nSummary: {highlights}"
+    max_samples: 15000
+
+  - name: "xsum"
+    path: "xsum"
+    config: null
+    train_split: "train"
+    validation_split: "validation"
+    text_column: "document"
+    format: "template"
+    template: "Document: {document}\nSummary: {summary}"
+    max_samples: 15000
+
+  - name: "daily_dialog"
+    path: "daily_dialog"
+    config: null
+    train_split: "train"
+    validation_split: "validation"
+    text_column: "dialog"
+    format: "dialog"
+
+  - name: "eli5"
+    path: "eli5"
+    config: null
+    train_split: "train_eli5"
+    validation_split: "validation_eli5"
+    text_column: "text"
+    format: "raw"
+    max_samples: 15000
+
+  - name: "squad"
+    path: "squad"
+    config: null
+    train_split: "train"
+    validation_split: "validation"
+    text_column: "context"
+    format: "template"
+    template: "Context: {context}\nQuestion: {question}\nAnswer: {answers[text][0]}"
