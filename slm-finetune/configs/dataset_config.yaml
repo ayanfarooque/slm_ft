@@ -29,7 +29,7 @@ datasets:
     format: "raw"
 
   - name: "wikitext-103"
-    path: "wikitext"
+    path: "Salesforce/wikitext"
     config: "wikitext-103-v1"
     train_split: "train"
     validation_split: "validation"
@@ -37,7 +37,7 @@ datasets:
     format: "raw"
 
   - name: "openwebtext"
-    path: "openwebtext"
+    path: "Skylion007/openwebtext"
     config: null
     train_split: "train"
     validation_split: null
@@ -47,16 +47,16 @@ datasets:
     max_samples: 50000
 
   - name: "ag_news"
-    path: "ag_news"
+    path: "fancyzhx/ag_news"
     config: null
     train_split: "train"
     validation_split: "test"
     text_column: "text"
     format: "template"
-    template: "Title: {title}\nText: {text}\nCategory: {label}"
+    template: "Text: {text}\nCategory: {label}"
 
   - name: "yelp_review_full"
-    path: "yelp_review_full"
+    path: "Yelp/yelp_review_full"
     config: null
     train_split: "train"
     validation_split: "test"
@@ -66,7 +66,7 @@ datasets:
     max_samples: 20000
 
   - name: "cnn_dailymail"
-    path: "cnn_dailymail"
+    path: "ccdv/cnn_dailymail"
     config: "3.0.0"
     train_split: "train"
     validation_split: "validation"
@@ -76,7 +76,7 @@ datasets:
     max_samples: 15000
 
   - name: "xsum"
-    path: "xsum"
+    path: "EdinburghNLP/xsum"
     config: null
     train_split: "train"
     validation_split: "validation"
@@ -86,7 +86,7 @@ datasets:
     max_samples: 15000
 
   - name: "daily_dialog"
-    path: "daily_dialog"
+    path: "DeepPavlov/daily_dialog"
     config: null
     train_split: "train"
     validation_split: "validation"
@@ -94,7 +94,7 @@ datasets:
     format: "dialog"
 
   - name: "eli5"
-    path: "eli5"
+    path: "vblagoje/eli5"
     config: null
     train_split: "train_eli5"
     validation_split: "validation_eli5"
@@ -103,7 +103,7 @@ datasets:
     max_samples: 15000
 
   - name: "squad"
-    path: "squad"
+    path: "rajpurkar/squad"
     config: null
     train_split: "train"
     validation_split: "validation"
