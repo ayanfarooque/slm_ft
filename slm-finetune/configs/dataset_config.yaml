@@ -93,3 +93,23 @@ datasets:
     format: "template"
     template: "Context: {context}\nQuestion: {question}\nAnswer: {answers[text][0]}"
     max_samples: 2500
+
+  - name: "imdb_reviews"
+    path: "stanfordnlp/imdb"
+    config: null
+    train_split: "train"
+    validation_split: "test"
+    text_column: "text"
+    format: "template"
+    template: "Movie Review: {text}\nSentiment: {label}"
+    max_samples: 2000
+
+  - name: "amazon_reviews"
+    path: "SetFit/amazon_reviews_multi_en"
+    config: null
+    train_split: "train"
+    validation_split: "validation"
+    text_column: "text"
+    format: "template"
+    template: "Product Review: {text}"
+    max_samples: 2000

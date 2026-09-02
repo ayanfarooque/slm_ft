@@ -1,0 +1,51 @@
+# configs/ablations/train_seqlen256.yaml
+
+model:
+  model_name_or_path: "EleutherAI/pythia-410m"
+  use_cache: false
+  torch_dtype: "bfloat16"
+  device_map: "auto"
+
+training_args:
+  output_dir: "./outputs/ablation_seqlen256"
+  fp16: false
+  bf16: true
+  gradient_checkpointing: true
+  
+  per_device_train_batch_size: 2
+  per_device_eval_batch_size: 2
+  gradient_accumulation_steps: 8      # Effective batch size = 16
+  
+  learning_rate: 2.0e-4
+  weight_decay: 0.01
+  adam_beta1: 0.9
+  adam_beta2: 0.999
+  adam_epsilon: 1.0e-8
+  max_grad_norm: 1.0
+  lr_scheduler_type: "cosine"
+  warmup_ratio: 0.03
+  
+  max_steps: 500
+  logging_steps: 10
+  eval_steps: 100
+  save_steps: 500
+  evaluation_strategy: "steps"
+  save_strategy: "steps"
+  save_total_limit: 1
+  load_best_model_at_end: true
+  metric_for_best_model: "eval_loss"
+  
+  dataloader_num_workers: 2
+  group_by_length: true
+  ddp_find_unused_parameters: false
+
+logging:
+  report_to:
+    - "wandb"
+  wandb:
+    project: "slm-finetune"
+    name: "pythia-410m-ablation-seqlen256"
+    log_model: "false"
+    tags:
+      - "model=pythia-410m"
+      - "experiment=ablation_seqlen256"

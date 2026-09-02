@@ -1,0 +1,36 @@
+# configs/ablations/dataset_seqlen256.yaml
+
+preprocessing:
+  max_seq_length: 256
+  stride: 128
+  pad_to_multiple_of: 8
+  overwrite_cache: false
+
+datasets:
+  - name: "TinyStories"
+    path: "roneneldan/TinyStories"
+    config: null
+    train_split: "train"
+    validation_split: "validation"
+    text_column: "text"
+    format: "raw"
+    max_samples: 3000
+
+  - name: "wikitext-103"
+    path: "Salesforce/wikitext"
+    config: "wikitext-103-v1"
+    train_split: "train"
+    validation_split: "validation"
+    text_column: "text"
+    format: "raw"
+    max_samples: 3000
+
+  - name: "openwebtext"
+    path: "Skylion007/openwebtext"
+    config: null
+    train_split: "train"
+    validation_split: null
+    val_split_percentage: 5
+    text_column: "text"
+    format: "raw"
+    max_samples: 4000

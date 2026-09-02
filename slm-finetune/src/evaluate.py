@@ -348,10 +348,29 @@ def main():
             "val_bpt": metrics["val/bpt"]
         })
         
+        # Calculate delta_ppl relative to initial step 100 benchmark (PPL 22.51)
+        initial_ppl = 22.51
+        delta_ppl = initial_ppl - metrics["val/ppl"]
+        metrics["val/delta_ppl"] = delta_ppl
+
         # Log metrics to W&B
         wandb.log({"checkpoint": ckpt_name, **metrics})
+
+        # Log length bucket bar chart to W&B
+        bucket_data = [
+            [b_name.replace("val/ppl_", ""), b_val] 
+            for b_name, b_val in metrics.items() 
+            if b_name.startswith("val/ppl_") and not math.isnan(b_val)
+        ]
+        if bucket_data:
+            bucket_table = wandb.Table(data=bucket_data, columns=["length_bucket", "perplexity"])
+            wandb.log({
+                "val/ppl_by_length_bucket": wandb.plot.bar(
+                    bucket_table, "length_bucket", "perplexity", title=f"Perplexity by Length Bucket ({ckpt_name})"
+                )
+            })
         
-        logger.info(f"Checkpoint '{ckpt_name}' - Token Loss: {metrics['val/token_loss']:.4f} | Perplexity: {metrics['val/ppl']:.2f} | BPT: {metrics['val/bpt']:.4f}")
+        logger.info(f"Checkpoint '{ckpt_name}' - Token Loss: {metrics['val/token_loss']:.4f} | Perplexity: {metrics['val/ppl']:.2f} | BPT: {metrics['val/bpt']:.4f} | Delta PPL: -{delta_ppl:.2f}")
         
         # Clear CUDA cache between checkpoint evaluations
         del model
@@ -381,7 +400,7 @@ def main():
         ex_table = wandb.Table(dataframe=ex_df)
         wandb.log({"val/examples": ex_table})
         
-    logger.info("\nEvaluation complete! All metrics and rankings logged.")
+    logger.info("\nEvaluation complete! All metrics, length bucket charts, and rankings logged to W&B.")
     wandb.finish()
 
 
