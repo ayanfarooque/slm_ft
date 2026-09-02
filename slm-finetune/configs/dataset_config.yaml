@@ -1,24 +1,11 @@
 # configs/dataset_config.yaml
 
-# Global dataset pre-processing and tokenization parameters
 preprocessing:
   max_seq_length: 512
-  packing: true  # Pack multiple examples into one sequence to maximize throughput
-  truncation: true
-  padding: "max_length"
-  add_special_tokens: true
-  text_column_mapping:
-    # Maps dataset fields to a unified 'text' format for pre-training/fine-tuning
-    default: "text"
-    ag_news: "text"
-    yelp_review_full: "text"
-    cnn_dailymail: "article"
-    xsum: "document"
-    daily_dialog: "dialog"
-    eli5: "text"
-    squad: "context"
+  stride: 256
+  pad_to_multiple_of: 8
+  overwrite_cache: false
 
-# Datasets definition (10 non-reasoning, text-only datasets)
 datasets:
   - name: "TinyStories"
     path: "roneneldan/TinyStories"
@@ -27,6 +14,7 @@ datasets:
     validation_split: "validation"
     text_column: "text"
     format: "raw"
+    max_samples: 3000
 
   - name: "wikitext-103"
     path: "Salesforce/wikitext"
@@ -35,6 +23,7 @@ datasets:
     validation_split: "validation"
     text_column: "text"
     format: "raw"
+    max_samples: 3000
 
   - name: "openwebtext"
     path: "Skylion007/openwebtext"
@@ -44,7 +33,7 @@ datasets:
     val_split_percentage: 5
     text_column: "text"
     format: "raw"
-    max_samples: 50000
+    max_samples: 4000
 
   - name: "ag_news"
     path: "fancyzhx/ag_news"
@@ -54,6 +43,7 @@ datasets:
     text_column: "text"
     format: "template"
     template: "Text: {text}\nCategory: {label}"
+    max_samples: 2500
 
   - name: "yelp_review_full"
     path: "Yelp/yelp_review_full"
@@ -63,7 +53,7 @@ datasets:
     text_column: "text"
     format: "template"
     template: "Review: {text}\nRating: {label}"
-    max_samples: 20000
+    max_samples: 2500
 
   - name: "cnn_dailymail"
     path: "ccdv/cnn_dailymail"
@@ -73,7 +63,7 @@ datasets:
     text_column: "article"
     format: "template"
     template: "Article: {article}\nSummary: {highlights}"
-    max_samples: 15000
+    max_samples: 2000
 
   - name: "xsum"
     path: "EdinburghNLP/xsum"
@@ -83,7 +73,7 @@ datasets:
     text_column: "document"
     format: "template"
     template: "Document: {document}\nSummary: {summary}"
-    max_samples: 15000
+    max_samples: 2000
 
   - name: "daily_dialog"
     path: "DeepPavlov/daily_dialog"
@@ -92,15 +82,7 @@ datasets:
     validation_split: "validation"
     text_column: "dialog"
     format: "dialog"
-
-  - name: "eli5"
-    path: "vblagoje/eli5"
-    config: null
-    train_split: "train_eli5"
-    validation_split: "validation_eli5"
-    text_column: "text"
-    format: "raw"
-    max_samples: 15000
+    max_samples: 2000
 
   - name: "squad"
     path: "rajpurkar/squad"
@@ -110,3 +92,4 @@ datasets:
     text_column: "context"
     format: "template"
     template: "Context: {context}\nQuestion: {question}\nAnswer: {answers[text][0]}"
+    max_samples: 2500

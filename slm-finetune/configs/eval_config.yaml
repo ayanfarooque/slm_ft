@@ -1,0 +1,35 @@
+# configs/eval_config.yaml
+
+eval:
+  batch_size: 4
+  max_eval_samples: 50
+  seq_len: 512
+  length_buckets:
+    - name: "short_0_128"
+      min_len: 0
+      max_len: 128
+    - name: "medium_128_256"
+      min_len: 128
+      max_len: 256
+    - name: "long_256_512"
+      min_len: 256
+      max_len: 512
+
+generation:
+  max_new_tokens: 50
+  temperature: 0.7
+  top_p: 0.9
+  do_sample: true
+  num_return_sequences: 1
+  prompts:
+    - "Once upon a time in a small village,"
+    - "The main headline in today's news is"
+    - "Review: The food was absolutely wonderful and"
+    - "Article: Climate change has impacted global weather patterns.\nSummary:"
+
+logging:
+  report_to:
+    - "wandb"
+  wandb:
+    project: "slm-finetune"
+    name: "pythia-410m-qlora-evaluation"

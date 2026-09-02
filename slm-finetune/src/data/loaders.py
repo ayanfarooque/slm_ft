@@ -65,9 +65,10 @@ def format_row(example: Dict[str, Any], dataset_cfg: Dict[str, Any], features: A
         return {"text": str(val) if val is not None else ""}
 
 
-def load_single_dataset(dataset_cfg: Dict[str, Any], is_val: bool = False) -> Optional[Dataset]:
+def load_single_dataset(dataset_cfg: Dict[str, Any], is_val: bool = False, streaming: bool = False) -> Optional[Dataset]:
     """
     Loads and normalizes a single dataset according to its configuration.
+    Supports streaming to fetch small subsets without downloading full large datasets.
     """
     name = dataset_cfg.get("name")
     path = dataset_cfg.get("path")
@@ -82,24 +83,40 @@ def load_single_dataset(dataset_cfg: Dict[str, Any], is_val: bool = False) -> Op
     else:
         split = dataset_cfg.get("train_split", "train")
         
-    logger.info(f"Loading dataset: {name} (path: {path}, split: {split})")
+    logger.info(f"Loading dataset: {name} (path: {path}, split: {split}, streaming: {streaming})")
     
     try:
-        # Load dataset
-        if config:
-            dataset = load_dataset(path, config, split=split)
-        else:
-            dataset = load_dataset(path, split=split)
-            
-        # Apply max_samples capping
+        # Determine max samples to fetch
         max_samples = dataset_cfg.get("max_samples")
-        if max_samples and not is_val:
-            dataset = dataset.select(range(min(max_samples, len(dataset))))
-        elif max_samples and is_val:
-            # For validation split, cap it proportionally to keep it light
-            val_cap = max(100, int(max_samples * 0.1))
-            dataset = dataset.select(range(min(val_cap, len(dataset))))
-            
+        if is_val:
+            if max_samples:
+                max_samples = max(100, int(max_samples * 0.1))
+            else:
+                max_samples = 200  # Default validation fallback limit
+        
+        if streaming:
+            # Stream the dataset and materialize the subset in memory
+            if config:
+                stream_ds = load_dataset(path, config, split=split, streaming=True)
+            else:
+                stream_ds = load_dataset(path, split=split, streaming=True)
+                
+            # If training split and no max_samples, set a reasonable default for streaming
+            limit = max_samples if max_samples else 2000
+            samples = []
+            for item in stream_ds.take(limit):
+                samples.append(item)
+            dataset = Dataset.from_list(samples)
+        else:
+            # Standard full download and load
+            if config:
+                dataset = load_dataset(path, config, split=split)
+            else:
+                dataset = load_dataset(path, split=split)
+                
+            if max_samples:
+                dataset = dataset.select(range(min(max_samples, len(dataset))))
+                
         # Normalize features
         features = dataset.features
         
@@ -116,7 +133,7 @@ def load_single_dataset(dataset_cfg: Dict[str, Any], is_val: bool = False) -> Op
         return None
 
 
-def load_all_datasets(config_path: str) -> DatasetDict:
+def load_all_datasets(config_path: str, streaming: bool = False) -> DatasetDict:
     """
     Loads all datasets listed in the configuration file, normalizes them,
     and returns a combined DatasetDict containing 'train' and 'validation' splits.
@@ -131,7 +148,7 @@ def load_all_datasets(config_path: str) -> DatasetDict:
     for cfg in dataset_configs:
         name = cfg.get("name")
         # Load Train split
-        train_ds = load_single_dataset(cfg, is_val=False)
+        train_ds = load_single_dataset(cfg, is_val=False, streaming=streaming)
         if train_ds is None:
             logger.warning(f"Skipping dataset {name} as it failed to load.")
             continue
@@ -139,7 +156,7 @@ def load_all_datasets(config_path: str) -> DatasetDict:
         # Load Validation split or create one
         val_split_name = cfg.get("validation_split")
         if val_split_name:
-            val_ds = load_single_dataset(cfg, is_val=True)
+            val_ds = load_single_dataset(cfg, is_val=True, streaming=streaming)
             if val_ds is not None:
                 val_datasets.append(val_ds)
                 train_datasets.append(train_ds)
@@ -161,8 +178,6 @@ def load_all_datasets(config_path: str) -> DatasetDict:
         raise ValueError("No datasets were successfully loaded.")
         
     # Interleave or Concatenate datasets
-    # Since we want a unified mixed corpus, we can use interleave_datasets
-    # If any errors occur or no probabilities are set, fallback to concatenation
     logger.info("Combining all normalized datasets...")
     try:
         combined_train = interleave_datasets(train_datasets, stopping_strategy="all_exhausted")
